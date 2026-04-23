@@ -1,86 +1,73 @@
-# 🧠 Argus: Multi-Agent Verified RAG Research Assistant
+# Argus: Multi-Agent Verified Retrieval-Augmented Generation
 
-Argus is a **stateful multi-agent Retrieval-Augmented Generation (RAG) system** built using LangGraph, Qdrant, and a local LLM (Phi3 via Ollama). It simulates a real-world AI research assistant by combining retrieval, reasoning, and self-evaluation in a structured pipeline.
+Argus is a stateful research assistant designed to provide high-accuracy answers by combining multi-agent orchestration with local LLM inference. Unlike standard RAG systems that follow a linear "retrieve-and-generate" path, Argus utilizes a directed graph workflow (via LangGraph) to reason, evaluate, and self-correct its responses before they reach the user.
 
----
+## Core Methodology
 
-## 🚀 Features
+The system is built on the principle of "verification through collaboration." By separating concerns into specialized agents, the system can handle complex queries that require more than just a simple database lookup.
 
-- 🔍 Semantic Retrieval using Qdrant + SentenceTransformers  
-- 🧠 Multi-Agent Workflow (LangGraph)
-  - Router (query classification)
-  - Retriever (document search)
-  - Analyst (LLM-based reasoning)
-  - Critic (LLM-based evaluation)
-- 🔁 Self-Correction Loop to reduce hallucinations  
-- 🏠 Fully Local LLM using Ollama (no API cost)  
-- ⚡ Modular and scalable architecture  
+### The Multi-Agent Pipeline
 
----
+1. **Router**: Analyzes the incoming query to determine the best processing path. It distinguishes between general greetings (which bypass retrieval) and technical research questions.
+2. **Query Expander**: Generates multiple semantic variations of the user's question to ensure broader coverage during the retrieval phase.
+3. **Retriever**: Performs semantic search against a Qdrant vector database to fetch relevant document chunks.
+4. **Analyst**: Synthesizes the retrieved context and the expanded queries to draft a comprehensive, grounded answer.
+5. **Critic**: Acts as an internal quality gate. It evaluates the Analyst's draft for faithfulness to the source text and identifies any potential hallucinations. If the quality score is low, it triggers a revision loop.
 
-## 🧠 System Architecture
+## Technical Architecture
 
+The project is designed to run entirely on local hardware, ensuring data privacy and eliminating external API dependencies.
 
-User Query
-↓
-Router
-↓
-Retriever (Qdrant)
-↓
-Analyst (LLM - Phi3)
-↓
-Critic (LLM Evaluation)
-↓
-Retry Loop (if needed)
-↓
-Final Answer
+- **Orchestration**: LangGraph manages the state and transitions between agents.
+- **Vector Database**: Qdrant is used for high-performance semantic search and metadata filtering.
+- **Inference Engine**: Ollama handles local execution of models like Phi3 or Llama3.
+- **Embeddings**: SentenceTransformers (specifically all-MiniLM-L6-v2) for generating semantic vectors.
+- **Backend**: FastAPI provides an asynchronous interface with thread-offloading for long-running graph tasks.
 
+## Performance and Concurrency
 
----
+Argus is optimized for responsiveness even during heavy LLM workloads:
+- **Asynchronous Handling**: The FastAPI layer is fully async, ensuring the server remains reachable while processing requests.
+- **Thread Management**: Since LLM inference is CPU/GPU intensive, the system uses `asyncio.to_thread` to offload graph execution, preventing blocking of the main event loop.
+- **Infrastructure Note**: While the API layer scales horizontally, local LLM inference is typically sequential. For high-volume production use, we recommend a distributed inference backend.
 
-## 📦 Tech Stack
+## Getting Started
 
-- LangGraph – Workflow orchestration  
-- LangChain – LLM & retrieval integration  
-- Qdrant – Vector database  
-- SentenceTransformers – Embeddings  
-- Ollama (Phi3) – Local LLM  
-- Python  
+### Prerequisites
+- Python 3.10+
+- Ollama (running locally)
+- Qdrant (or local storage enabled)
 
----
+### Installation
 
-## 📂 Project Structure
-
-
-argus-ai/
-│
-├── app/
-│ ├── graph/ # LangGraph workflow & nodes
-│ ├── rag/ # ingestion & vectorstore
-│ ├── state/ # graph state schema
-│ ├── llm.py # LLM configuration
-│ └── main.py # entry point
-│
-├── data/
-│ └── raw/ # PDF documents
-│
-├── notebooks/
-├── requirements.txt
-└── README.md
-
-
----
-
-## ⚡ Concurrency & Performance
-
-Argus is designed for efficient local execution:
-- **Async FastAPI**: All endpoints are asynchronous to prevent blocking the main event loop.
-- **Thread Offloading**: Long-running graph executions (LLM calls) are offloaded to separate threads using `asyncio.to_thread` to ensure the API remains responsive.
-- **Current Scaling Limitations**: While the API layer is async, local LLM inference is sequential on single-GPU/CPU setups. For production scaling, we recommend moving LLM inference to a dedicated cluster (e.g., vLLM or TGI).
-
----
-
-### 1️⃣ Clone repo
+1. Clone the repository:
 ```bash
-git clone https://github.com/your-username/argus-ai-rag.git
+git clone https://github.com/TinkerTechie/argus-ai-rag.git
 cd argus-ai
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Prepare the vector store:
+```bash
+python -m app.rag.vectorstore
+```
+
+4. Launch the application:
+```bash
+# Start the API
+uvicorn app.api:app --host 127.0.0.1 --port 8000
+
+# In a new terminal, start the UI
+streamlit run app/ui.py
+```
+
+## Evaluation and Justification
+
+The project includes built-in benchmarking tools to validate architectural choices:
+- **Evaluation Framework**: Uses RAGAS to measure faithfulness, relevancy, and recall.
+- **Chunking Analysis**: Empirical testing of different chunk sizes (256, 500, 1000) to find the optimal retrieval balance.
+- **Critic Calibration**: Quantified comparison of system performance with and without the self-correction loop.
