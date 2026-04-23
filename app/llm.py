@@ -1,6 +1,6 @@
-from langchain_community.chat_models import ChatOllama
+from langchain_ollama import ChatOllama
 
 llm = ChatOllama(
-    model="llama3",
+    model="phi3",
     temperature=0.2
 )

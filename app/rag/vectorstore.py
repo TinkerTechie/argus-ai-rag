@@ -1,5 +1,6 @@
-from langchain_community.vectorstores import FAISS
+from langchain_qdrant import QdrantVectorStore
 from app.rag.ingest import load_documents, split_documents
+import os
 
 try:
     from langchain_huggingface import HuggingFaceEmbeddings
@@ -19,11 +20,15 @@ def create_vectorstore():
         model_name="all-MiniLM-L6-v2"
     )
 
-    vectorstore = FAISS.from_documents(chunks, embeddings)
+    # Use Qdrant local storage
+    vectorstore = QdrantVectorStore.from_documents(
+        chunks,
+        embedding=embeddings,
+        path="./qdrant_db",
+        collection_name="argus_docs",
+    )
 
-    vectorstore.save_local("faiss_index")
-
-    print("Vector store created and saved!")
+    print("Qdrant vector store created and saved at ./qdrant_db")
 
 if __name__ == "__main__":
     create_vectorstore()

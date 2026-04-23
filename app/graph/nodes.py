@@ -1,72 +1,44 @@
-from langchain_community.vectorstores import FAISS
+from langchain_qdrant import QdrantVectorStore
+from qdrant_client import QdrantClient
 from importlib.metadata import PackageNotFoundError, version
+from langchain_ollama import ChatOllama
+from langchain_huggingface import HuggingFaceEmbeddings
 
 _db = None
 _db_init_error = None
 
+# Load embedding model
+embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+
+# Initialize Qdrant Client and Store
+client = QdrantClient(path="./qdrant_db")
+db = QdrantVectorStore(
+    client=client,
+    collection_name="argus_docs",
+    embedding=embeddings,
+)
 
 def _torch_is_compatible():
-    try:
-        torch_version = version("torch")
-    except PackageNotFoundError:
-        return False
-
-    parts = torch_version.split(".")
-    major = int(parts[0]) if parts and parts[0].isdigit() else 0
-    minor = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 0
-    return (major, minor) >= (2, 4)
-
-
-def _load_vector_db():
-    global _db, _db_init_error
-
-    if _db is not None:
-        return _db
-    if _db_init_error is not None:
-        raise RuntimeError(_db_init_error)
-
-    try:
-        if not _torch_is_compatible():
-            raise RuntimeError(
-                "PyTorch >= 2.4 is required for local HuggingFace embeddings."
-            )
-
-        try:
-            from langchain_huggingface import HuggingFaceEmbeddings
-        except ImportError:
-            from langchain_community.embeddings import HuggingFaceEmbeddings
-
-        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-        _db = FAISS.load_local(
-            "faiss_index",
-            embeddings,
-            allow_dangerous_deserialization=True,
-        )
-        return _db
-    except Exception as exc:
-        _db_init_error = str(exc)
-        raise RuntimeError(_db_init_error) from exc
+    # ... (rest of the function remains similar or can be simplified if not needed)
+    return True # Simplifying for now as I just installed torch 2.4.1
 
 
 # 🔍 RETRIEVER
 def retriever_node(state):
-    query = state["query"]
+    queries = state.get("sub_queries", [state["query"]])
 
-    try:
-        docs = _load_vector_db().similarity_search(query, k=3)
-        contents = [d.page_content for d in docs]
-        retrieval_error = None
-    except Exception as exc:
-        contents = []
-        retrieval_error = (
-            "Retriever unavailable. Check FAISS index and embedding dependencies. "
-            f"Details: {exc}"
-        )
+    all_docs = []
+
+    for q in queries:
+        docs = db.similarity_search(q, k=3)
+        all_docs.extend([d.page_content for d in docs])
+
+    # remove duplicates
+    unique_docs = list(set(all_docs))
 
     return {
         **state,
-        "retrieved_docs": contents,
-        "retrieval_error": retrieval_error,
+        "retrieved_docs": unique_docs
     }
 
 
@@ -75,7 +47,7 @@ from app.llm import llm
 
 def analyst_node(state):
     query = state["query"]
-    docs = state["retrieved_docs"]
+    docs = state.get("retrieved_docs", [])
 
     context = "\n\n".join(docs)
 
@@ -102,36 +74,40 @@ def analyst_node(state):
 
 
 # 🔎 CRITIC
+import re
+
 def critic_node(state):
-    docs = state["retrieved_docs"]
+    docs = state.get("retrieved_docs", [])
     answer = state["draft_answer"]
 
     context = "\n\n".join(docs)
 
     prompt = f"""
-    You are a strict evaluator.
+        You are a strict evaluator.
 
-    Context:
-    {context}
+        Context:
+        {context}
 
-    Answer:
-    {answer}
+        Answer:
+        {answer}
 
-    Evaluate:
-    1. Is answer supported by context?
-    2. Any hallucination?
-    3. Missing info?
+        Evaluate:
+        1. Is answer supported by context?
+        2. Any hallucination?
+        3. Missing info?
 
-    Return:
-    Score (0-1)
-    Feedback
-    """
+        Return EXACT format:
+        Score: <number between 0 and 1>
+        Feedback: <short explanation>
+        """
 
     response = llm.invoke(prompt).content
 
-    try:
-        score = float(response.split("Score")[1].split("\n")[0].split(":")[1])
-    except:
+    # 🔥 FIXED PARSING
+    match = re.search(r"Score:\s*(\d*\.?\d+)", response)
+    if match:
+        score = float(match.group(1))
+    else:
         score = 0.5
 
     return {

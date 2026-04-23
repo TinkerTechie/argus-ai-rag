@@ -1,0 +1,102 @@
+[
+    {
+        "question": "What is the core idea behind RAG?",
+        "ground_truth": "Provide external documents in the prompt so the AI answers from real facts instead of just relying on its training data."
+    },
+    {
+        "question": "What are the three main steps in the RAG workflow?",
+        "ground_truth": "The three steps are Retrieval (search), Augmentation (combine), and Generation (answer)."
+    },
+    {
+        "question": "What happens during the Retrieval step in RAG?",
+        "ground_truth": "The system searches through the documents and finds the relevant paragraph or information that answers the user's question."
+    },
+    {
+        "question": "Explain the Augmentation step in a RAG system.",
+        "ground_truth": "The model merges the original user question with the retrieved text into a single, informative prompt."
+    },
+    {
+        "question": "How does the Generation step produce an answer in RAG?",
+        "ground_truth": "The LLM reads the combined prompt (question + retrieved context) and writes an accurate, grounded answer based on that information."
+    },
+    {
+        "question": "Does RAG involve retraining the model's weights?",
+        "ground_truth": "No, RAG provides external context to the model at inference time rather than retraining its weights."
+    },
+    {
+        "question": "What is the benefit of RAG over a standard LLM approach?",
+        "ground_truth": "RAG allows the AI to answer from real facts provided in external documents, reducing hallucinations and ensuring the answer is grounded in specific, up-to-date data."
+    },
+    {
+        "question": "Give an example of a RAG workflow for an HR query about leave policy.",
+        "ground_truth": "User asks 'What is the leave policy?', system retrieves relevant sections from 'Employee Handbook.pdf', combines them with the question, and the LLM generates an answer like 'According to Section 4.2, employees are entitled to 18 days...'"
+    },
+    {
+        "question": "What role do documents like an Employee Handbook play in RAG?",
+        "ground_truth": "They serve as the external knowledge base from which the system retrieves relevant facts to answer user questions."
+    },
+    {
+        "question": "What is the final output of the RAG pipeline?",
+        "ground_truth": "The final output is an accurate, grounded answer based on the retrieved document context."
+    },
+    {
+        "question": "What are the components of the combined prompt in the Augmentation step?",
+        "ground_truth": "The combined prompt consists of the original user question and the retrieved text from the documents."
+    },
+    {
+        "question": "Why is the Retrieval step important in RAG?",
+        "ground_truth": "It ensures that only the most relevant information is passed to the LLM, making the prompt more efficient and accurate."
+    },
+    {
+        "question": "How does RAG handle large volumes of documents?",
+        "ground_truth": "By using a Retrieval step to filter for only the most relevant information before passing it to the LLM."
+    },
+    {
+        "question": "What does 'grounded answer' mean in the context of RAG?",
+        "ground_truth": "An answer that is based on and supported by the facts found in the retrieved documents."
+    },
+    {
+        "question": "Is RAG specific to any one type of document?",
+        "ground_truth": "No, RAG can work with various document types such as PDFs, Word docs, text files, etc."
+    },
+    {
+        "question": "How does semantic search differ from keyword search in a RAG system?",
+        "ground_truth": "Semantic search finds meaning-based matches using embeddings, while keyword search only looks for exact word matches."
+    },
+    {
+        "question": "What is the purpose of a Reranker in a RAG pipeline?",
+        "ground_truth": "A reranker re-evaluates the initially retrieved documents to select the most relevant ones, improving context quality for the LLM."
+    },
+    {
+        "question": "What is 'hallucination' in the context of LLMs and how does RAG help?",
+        "ground_truth": "Hallucination is when an LLM makes up facts; RAG helps by providing real document context to ground the AI's responses."
+    },
+    {
+        "question": "Can RAG be used with real-time data?",
+        "ground_truth": "Yes, if the vector database is updated frequently with new information, RAG can provide up-to-date answers."
+    },
+    {
+        "question": "What are 'embeddings' in a vector database?",
+        "ground_truth": "Embeddings are mathematical representations (vectors) of text that capture semantic meaning for similarity searching."
+    },
+    {
+        "question": "Why do we use 'chunking' in RAG?",
+        "ground_truth": "Chunking breaks large documents into smaller pieces so they fit within the LLM's context window and improve retrieval precision."
+    },
+    {
+        "question": "What is the role of the 'State' in a multi-agent LangGraph system?",
+        "ground_truth": "The state acts as a shared memory that agents read from and write to as they collaborate on a task."
+    },
+    {
+        "question": "Explain the concept of a 'Critic' agent in Argus.",
+        "ground_truth": "The Critic agent reviews the Analyst's output for faithfulness and completeness, requesting revisions if necessary."
+    },
+    {
+        "question": "What is the benefit of using Qdrant over FAISS for production RAG?",
+        "ground_truth": "Qdrant supports persistence, metadata filtering, and horizontal scaling, which are essential for production workloads."
+    },
+    {
+        "question": "How does a Router help in a RAG system?",
+        "ground_truth": "A Router directs the query to the most appropriate processing path, such as bypassing RAG for general greetings."
+    }
+]

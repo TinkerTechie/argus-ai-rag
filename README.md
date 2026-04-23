@@ -1,12 +1,12 @@
 # 🧠 Argus – Multi-Agent RAG Research Assistant
 
-Argus is a **stateful multi-agent Retrieval-Augmented Generation (RAG) system** built using LangGraph, FAISS, and a local LLM (Llama3 via Ollama). It simulates a real-world AI research assistant by combining retrieval, reasoning, and self-evaluation in a structured pipeline.
+Argus is a **stateful multi-agent Retrieval-Augmented Generation (RAG) system** built using LangGraph, Qdrant, and a local LLM (Phi3 via Ollama). It simulates a real-world AI research assistant by combining retrieval, reasoning, and self-evaluation in a structured pipeline.
 
 ---
 
 ## 🚀 Features
 
-- 🔍 Semantic Retrieval using FAISS + SentenceTransformers  
+- 🔍 Semantic Retrieval using Qdrant + SentenceTransformers  
 - 🧠 Multi-Agent Workflow (LangGraph)
   - Router (query classification)
   - Retriever (document search)
@@ -25,9 +25,9 @@ User Query
 ↓
 Router
 ↓
-Retriever (FAISS)
+Retriever (Qdrant)
 ↓
-Analyst (LLM - Llama3)
+Analyst (LLM - Phi3)
 ↓
 Critic (LLM Evaluation)
 ↓
@@ -42,9 +42,9 @@ Final Answer
 
 - LangGraph – Workflow orchestration  
 - LangChain – LLM & retrieval integration  
-- FAISS – Vector database  
+- Qdrant – Vector database  
 - SentenceTransformers – Embeddings  
-- Ollama (Llama3) – Local LLM  
+- Ollama (Phi3) – Local LLM  
 - Python  
 
 ---
@@ -71,7 +71,14 @@ argus-ai/
 
 ---
 
-## ⚙️ Setup Instructions
+## ⚡ Concurrency & Performance
+
+Argus is designed for efficient local execution:
+- **Async FastAPI**: All endpoints are asynchronous to prevent blocking the main event loop.
+- **Thread Offloading**: Long-running graph executions (LLM calls) are offloaded to separate threads using `asyncio.to_thread` to ensure the API remains responsive.
+- **Current Scaling Limitations**: While the API layer is async, local LLM inference is sequential on single-GPU/CPU setups. For production scaling, we recommend moving LLM inference to a dedicated cluster (e.g., vLLM or TGI).
+
+---
 
 ### 1️⃣ Clone repo
 ```bash
