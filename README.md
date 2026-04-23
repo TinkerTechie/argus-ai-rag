@@ -1,4 +1,4 @@
-# 🧠 Argus – Multi-Agent RAG Research Assistant
+# 🧠 Argus: Multi-Agent Verified RAG Research Assistant
 
 Argus is a **stateful multi-agent Retrieval-Augmented Generation (RAG) system** built using LangGraph, Qdrant, and a local LLM (Phi3 via Ollama). It simulates a real-world AI research assistant by combining retrieval, reasoning, and self-evaluation in a structured pipeline.
 

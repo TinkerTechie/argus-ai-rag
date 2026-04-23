@@ -1,6 +1,6 @@
-# Argus-AI Architecture
+# Argus: Multi-Agent Verified RAG Architecture
 
-Argus-AI is a stateful multi-agent RAG (Retrieval-Augmented Generation) system built with LangGraph, FastAPI, and Qdrant.
+Argus is a stateful multi-agent RAG (Retrieval-Augmented Generation) system built with LangGraph, FastAPI, and Qdrant.
 
 ## System Workflow
 

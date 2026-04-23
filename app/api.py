@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from app.graph.workflow import build_graph
 
 # Initialize app
-app = FastAPI(title="Argus AI API")
+app = FastAPI(title="Argus: Multi-Agent Verified RAG API")
 
 # Load graph once
 graph = build_graph()

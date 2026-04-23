@@ -4,7 +4,7 @@ import time
 
 # ---------------- SETTINGS ----------------
 st.set_page_config(
-    page_title="Argus AI | Premium RAG",
+    page_title="Argus: Multi-Agent Verified RAG | Premium RAG",
     page_icon="🧠",
     layout="centered",
     initial_sidebar_state="expanded"
@@ -117,7 +117,7 @@ if "messages" not in st.session_state:
 # ---------------- SIDEBAR ----------------
 with st.sidebar:
     st.image("https://img.icons8.com/fluency/96/brain.png", width=60)
-    st.title("Argus AI")
+    st.title("Argus: Multi-Agent RAG")
     st.caption("v2.0.0 | Production Grade RAG")
     
     st.markdown("---")
@@ -138,8 +138,8 @@ with st.sidebar:
     st.info("Argus uses LangGraph for iterative reasoning and self-criticism to ensure factual accuracy.")
 
 # ---------------- MAIN UI ----------------
-st.markdown('<h1 class="main-header">Argus AI</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Intelligent local research assistant powered by Phi3 & LangGraph</p>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">Argus: Multi-Agent Verified RAG</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Advanced local research assistant powered by Phi3 & LangGraph</p>', unsafe_allow_html=True)
 
 # Display chat history
 for message in st.session_state.messages:
