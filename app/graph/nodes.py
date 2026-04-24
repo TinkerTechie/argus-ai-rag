@@ -72,6 +72,12 @@ def analyst_node(state):
         The user has asked a general question or a question where no specific context was found.
         Answer the question accurately based on your general knowledge.
         
+        CRITICAL FORMATTING RULES:
+        - Format your output beautifully using Markdown.
+        - Use bolding (**text**) for key terms and emphasis.
+        - Use short, punchy paragraphs to avoid walls of text.
+        - Use bullet points or numbered lists where appropriate to make it highly scannable.
+        
         Question:
         {query}
         
@@ -86,6 +92,12 @@ def analyst_node(state):
         You are an expert research assistant.
         
         Use the provided context to answer the question. If the context doesn't contain the answer, say so.
+        
+        CRITICAL FORMATTING RULES:
+        - Format your output beautifully using Markdown.
+        - Use bolding (**text**) for key terms and emphasis.
+        - Use short, punchy paragraphs to avoid walls of text.
+        - Use bullet points or numbered lists where appropriate to make it highly scannable.
         
         Context:
         {context}
