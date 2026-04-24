@@ -140,6 +140,21 @@ with st.sidebar:
     top_k = st.slider("Retrieval Depth (Top-K)", 1, 10, 5)
     
     st.markdown("---")
+    
+    st.subheader("📄 Upload Documents")
+    uploaded_files = st.file_uploader("Upload PDFs to build knowledge", type=["pdf", "txt"], accept_multiple_files=True)
+    if st.button("Process & Ingest", use_container_width=True):
+        if uploaded_files:
+            with st.spinner("Reading & ingesting documents..."):
+                from app.ingest import ingest_file
+                total_chunks = 0
+                for f in uploaded_files:
+                    total_chunks += ingest_file(f)
+                st.success(f"Added {total_chunks} chunks to the database! You can now ask questions about them.")
+        else:
+            st.warning("Please upload a file first.")
+            
+    st.markdown("---")
     st.info("Argus uses LangGraph for iterative reasoning and self-criticism to ensure factual accuracy.")
 
 # ---------------- MAIN UI ----------------
