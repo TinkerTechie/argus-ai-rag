@@ -1,6 +1,11 @@
 import streamlit as st
 import requests
 import time
+import sys
+import os
+
+# Ensure the repository root is in sys.path so 'app' modules can be imported
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # ---------------- SETTINGS ----------------
 st.set_page_config(
