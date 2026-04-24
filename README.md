@@ -13,6 +13,7 @@ The system is built on the principle of "verification through collaboration." By
 3. **Retriever**: Performs semantic search against a Qdrant vector database to fetch relevant document chunks.
 4. **Analyst**: Synthesizes the retrieved context and the expanded queries to draft a comprehensive, grounded answer.
 5. **Critic**: Acts as an internal quality gate. It evaluates the Analyst's draft for faithfulness to the source text and identifies any potential hallucinations. If the quality score is low, it triggers a revision loop.
+6. **Hybrid Routing & Fallback**: If the Retriever yields low-confidence results, the system automatically falls back to a Direct-LLM mode to provide a general knowledge answer rather than hallucinating based on incomplete data.
 
 ## Technical Architecture
 
@@ -20,7 +21,7 @@ The project is designed to run entirely on local hardware, ensuring data privacy
 
 - **Orchestration**: LangGraph manages the state and transitions between agents.
 - **Vector Database**: Qdrant is used for high-performance semantic search and metadata filtering.
-- **Inference Engine**: Ollama handles local execution of models like Phi3 or Llama3.
+- **Inference Engine**: Groq API (Llama 3.1) for high-speed multi-agent reasoning.
 - **Embeddings**: SentenceTransformers (specifically all-MiniLM-L6-v2) for generating semantic vectors.
 - **Backend**: FastAPI provides an asynchronous interface with thread-offloading for long-running graph tasks.
 

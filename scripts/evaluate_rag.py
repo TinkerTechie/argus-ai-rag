@@ -19,7 +19,7 @@ GOLDEN_DATASET_PATH = "data/golden_dataset.json"
 RESULTS_PATH = "EVALUATION.md"
 
 # Initialize models for RAGAS
-eval_llm = LangchainLLMWrapper(ChatOllama(model="phi3", temperature=0))
+eval_llm = LangchainLLMWrapper(ChatOllama(model="gemma3:1b", temperature=0))
 eval_embeddings = LangchainEmbeddingsWrapper(HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2"))
 
 async def run_evaluation(use_critic=True):

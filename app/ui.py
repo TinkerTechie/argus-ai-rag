@@ -124,7 +124,7 @@ with st.sidebar:
     
     with st.container():
         st.subheader("🚀 System Status")
-        st.markdown(f"**Model:** `Phi3` (Local)")
+        st.markdown(f"**Model:** `Llama 3.1 (Groq)`")
         st.markdown(f"**Mode:** `Advanced Multi-Agent`")
         st.status("System Active", state="complete")
 
@@ -139,7 +139,7 @@ with st.sidebar:
 
 # ---------------- MAIN UI ----------------
 st.markdown('<h1 class="main-header">Argus: Multi-Agent Verified RAG</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Advanced local research assistant powered by Phi3 & LangGraph</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Advanced research assistant powered by Groq & LangGraph</p>', unsafe_allow_html=True)
 
 # Display chat history
 for message in st.session_state.messages:

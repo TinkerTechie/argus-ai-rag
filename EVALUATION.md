@@ -5,7 +5,7 @@ This document summarizes the performance of the Argus AI RAG system using the RA
 ## Dataset Overview
 - **Total Questions:** 25
 - **Categories:** Easy (Definitions), Medium (Workflows), Complex (Architectural Reasoning)
-- **Model under test:** Phi3 (Local)
+- **Model under test:** Gemma 3 (Local)
 - **Embeddings:** all-MiniLM-L6-v2
 
 ## Metrics Summary

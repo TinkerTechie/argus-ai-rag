@@ -16,7 +16,7 @@ from langchain_core.documents import Document
 # Configuration
 GOLDEN_DATASET_PATH = "data/golden_dataset.json"
 CHUNK_SIZES = [256, 500, 1000]
-EVAL_LLM = LangchainLLMWrapper(ChatOllama(model="phi3", temperature=0))
+EVAL_LLM = LangchainLLMWrapper(ChatOllama(model="gemma3:1b", temperature=0))
 EVAL_EMBEDDINGS = LangchainEmbeddingsWrapper(HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2"))
 
 def split_documents_custom(documents, chunk_size, chunk_overlap=100):

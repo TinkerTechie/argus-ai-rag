@@ -1,3 +1,4 @@
+import re
 from app.llm import llm
 
 def reranker_node(state):
@@ -23,13 +24,22 @@ def reranker_node(state):
     response = llm.invoke(prompt).content
 
     # extract indices
+    selected_docs = []
     try:
-        indices = [int(x.strip()) - 1 for x in response.split(",")]
-        selected_docs = [docs[i] for i in indices if i < len(docs)]
+        # Expecting comma separated numbers
+        idx_matches = re.findall(r"\d+", response)
+        indices = [int(i) - 1 for i in idx_matches]
+        selected_docs = [docs[i] for i in indices if 0 <= i < len(docs)]
     except:
-        selected_docs = docs[:3]  # fallback
+        selected_docs = docs[:1] if docs else [] # Minimal fallback
+
+    # Threshold Logic: If we have no relevant docs, switch to direct mode
+    route = state.get("route", "rag")
+    if not selected_docs:
+        route = "direct"
 
     return {
         **state,
-        "retrieved_docs": selected_docs
+        "retrieved_docs": selected_docs,
+        "route": route
     }
