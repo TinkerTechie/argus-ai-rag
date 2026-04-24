@@ -213,10 +213,13 @@ if prompt := st.chat_input("Ask Argus anything..."):
                 feedback = result.get("critique_feedback", "No feedback available.")
                 
                 # Simulate streaming for premium feel
-                for chunk in answer.split():
-                    full_response += chunk + " "
+                import re
+                # Split while preserving spaces and newlines
+                tokens = re.split(r'(\s+)', answer)
+                for token in tokens:
+                    full_response += token
                     message_placeholder.markdown(full_response + "▌")
-                    time.sleep(0.02)
+                    time.sleep(0.01)
                 
                 message_placeholder.markdown(full_response)
                 
