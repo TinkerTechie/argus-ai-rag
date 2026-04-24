@@ -1,7 +1,7 @@
 from langchain_qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 from importlib.metadata import PackageNotFoundError, version
-from langchain_ollama import ChatOllama
+
 from langchain_huggingface import HuggingFaceEmbeddings
 
 _db = None

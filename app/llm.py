@@ -1,7 +1,9 @@
-from langchain_ollama import ChatOllama
+import os
+from langchain_groq import ChatGroq
 
-# Using local Ollama inference (gemma3:1b) — no internet required
-llm = ChatOllama(
-    model="gemma3:1b",
-    temperature=0.2
+# Using Groq API for high-speed inference on Streamlit Cloud
+llm = ChatGroq(
+    model="llama-3.1-8b-instant",
+    temperature=0.2,
+    api_key=os.environ.get("GROQ_API_KEY")
 )
