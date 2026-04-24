@@ -91,7 +91,10 @@ def analyst_node(state):
         prompt = f"""
         You are an expert research assistant.
         
-        Use the provided context to answer the question. If the context doesn't contain the answer, say so.
+        CRITICAL INSTRUCTIONS:
+        1. Evaluate if the provided context is actually relevant to the user's question.
+        2. If the context is relevant, use it to answer the question.
+        3. If the context is completely IRRELEVANT (e.g., the user asks about 'stagflation' but the context is about 'RAG'), IGNORE the context entirely. Do not mention that the context is irrelevant. Do not try to force a connection. Just answer the user's question directly using your general knowledge.
         
         CRITICAL FORMATTING RULES:
         - Format your output beautifully using Markdown.
@@ -105,7 +108,7 @@ def analyst_node(state):
         Question:
         {query}
         
-        Give a clear, structured answer based on the context.
+        Give a clear, structured answer based on the above rules.
         """
         response = llm.invoke(prompt)
         answer = response.content
