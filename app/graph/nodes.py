@@ -41,7 +41,10 @@ def retriever_node(state):
 
     for q in queries:
         docs = db.similarity_search(q, k=3)
-        all_docs.extend([d.page_content for d in docs])
+        for d in docs:
+            source_name = d.metadata.get("source", "Unknown Source")
+            content_with_meta = f"[Source: {source_name}]\n{d.page_content}"
+            all_docs.append(content_with_meta)
 
     # remove duplicates
     unique_docs = list(set(all_docs))
@@ -89,27 +92,39 @@ def analyst_node(state):
         # Standard RAG mode
         context = "\n\n".join(docs)
         prompt = f"""
-        You are an expert research assistant.
-        
-        CRITICAL INSTRUCTIONS:
-        1. Evaluate if the provided context is actually relevant to the user's question.
-        2. If the context is relevant, use it to answer the question.
-        3. If the context is completely IRRELEVANT (e.g., the user asks about 'stagflation' but the context is about 'RAG'), IGNORE the context entirely. Do not mention that the context is irrelevant. Do not try to force a connection. Just answer the user's question directly using your general knowledge.
-        
-        CRITICAL FORMATTING RULES:
-        - Format your output beautifully using Markdown.
-        - Use bolding (**text**) for key terms and emphasis.
-        - Use short, punchy paragraphs to avoid walls of text.
-        - Use bullet points or numbered lists where appropriate to make it highly scannable.
-        
-        Context:
-        {context}
-        
-        Question:
-        {query}
-        
-        Give a clear, structured answer based on the above rules.
-        """
+You are a research assistant.
+
+Answer the question ONLY using the provided context.
+
+Format your response EXACTLY as follows:
+
+📌 Answer:
+Provide a clear, structured explanation using bullet points or sections.
+
+📚 Sources:
+List the sources used from the context.
+For each source include:
+- Document name (if available)
+- Page number or chunk reference
+
+Example:
+- Document: "Macroeconomics Notes", Page 3
+- Document: "Economic Report", Page 7
+
+🔍 Confidence:
+Give a confidence score between 0 and 1 based on how well the answer is supported by the context.
+
+Rules:
+- Do NOT include information not present in the context
+- If information is missing, say "Insufficient information in context"
+- Keep answer structured and readable.
+
+Context:
+{context}
+
+Question:
+{query}
+"""
         response = llm.invoke(prompt)
         answer = response.content
 
