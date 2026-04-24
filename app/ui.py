@@ -170,54 +170,54 @@ if prompt := st.chat_input("Ask Argus anything..."):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Call Backend
+    # Call Backend / Graph Directly
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         full_response = ""
         
         with st.spinner("Analyzing data and generating response..."):
             try:
-                response = requests.post(
-                    "http://127.0.0.1:8000/ask",
-                    json={"query": prompt},
-                    timeout=60
-                )
+                # Direct graph invocation instead of requests.post
+                from app.graph.workflow import build_graph
                 
-                if response.status_code == 200:
-                    data = response.json()
-                    answer = data.get("answer", "No answer received.")
-                    score = data.get("score", 0.0)
-                    feedback = data.get("feedback", "No feedback available.")
-                    
-                    # Simulate streaming for premium feel
-                    for chunk in answer.split():
-                        full_response += chunk + " "
-                        message_placeholder.markdown(full_response + "▌")
-                        time.sleep(0.02)
-                    
-                    message_placeholder.markdown(full_response)
-                    
-                    # Score and Feedback (rendered after streaming)
-                    col1, col2 = st.columns([1, 4])
-                    with col1:
-                        st.markdown(f'<span class="confidence-label">Confidence</span>', unsafe_allow_html=True)
-                    with col2:
-                        st.progress(score)
-                        st.caption(f"{int(score*100)}% reliability score")
-                    
-                    with st.expander("🛠️ Internal Reasoning & Critic Feedback"):
-                        st.markdown(feedback)
-                    
-                    # Add to history
-                    st.session_state.messages.append({
-                        "role": "assistant", 
-                        "content": full_response,
-                        "score": score,
-                        "feedback": feedback
-                    })
-                    
-                else:
-                    st.error(f"Error: Backend returned {response.status_code}")
+                if "graph_app" not in st.session_state:
+                    st.session_state.graph_app = build_graph()
+                
+                result = st.session_state.graph_app.invoke({
+                    "query": prompt,
+                    "revision_count": 0
+                })
+                
+                answer = result.get("draft_answer", "No answer generated.")
+                score = result.get("critique_score", 0.0)
+                feedback = result.get("critique_feedback", "No feedback available.")
+                
+                # Simulate streaming for premium feel
+                for chunk in answer.split():
+                    full_response += chunk + " "
+                    message_placeholder.markdown(full_response + "▌")
+                    time.sleep(0.02)
+                
+                message_placeholder.markdown(full_response)
+                
+                # Score and Feedback
+                col1, col2 = st.columns([1, 4])
+                with col1:
+                    st.markdown(f'<span class="confidence-label">Confidence</span>', unsafe_allow_html=True)
+                with col2:
+                    st.progress(score)
+                    st.caption(f"{int(score*100)}% reliability score")
+                
+                with st.expander("🛠️ Internal Reasoning & Critic Feedback"):
+                    st.markdown(feedback)
+                
+                # Add to history
+                st.session_state.messages.append({
+                    "role": "assistant", 
+                    "content": full_response,
+                    "score": score,
+                    "feedback": feedback
+                })
                     
             except Exception as e:
-                st.error(f"Connection failed: {e}")
+                st.error(f"Error processing query: {e}")

@@ -4,4 +4,4 @@ __pycache__/
 *.pyc
 faiss_index/
 .env
-.DS_Storeqdrant_db/
+.DS_Store

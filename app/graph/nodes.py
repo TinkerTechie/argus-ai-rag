@@ -10,6 +10,16 @@ _db_init_error = None
 # Load embedding model
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
+import os
+
+# Streamlit hot-reloading hack: Remove stuck Qdrant lock file
+lock_file = "./qdrant_db/.lock"
+if os.path.exists(lock_file):
+    try:
+        os.remove(lock_file)
+    except Exception:
+        pass
+
 # Initialize Qdrant Client and Store
 client = QdrantClient(path="./qdrant_db")
 db = QdrantVectorStore(
