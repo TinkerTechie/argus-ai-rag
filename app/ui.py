@@ -155,75 +155,70 @@ with st.sidebar:
             st.warning("Please upload a file first.")
             
     st.markdown("---")
+    st.subheader("🎓 Learn Architecture")
+    if st.button("Generate Interactive Lesson", use_container_width=True):
+        with st.spinner("Generating lesson from architecture..."):
+            from app.lesson import generate_lesson_from_architecture
+            try:
+                st.session_state.lesson_data = generate_lesson_from_architecture()
+                st.session_state.lesson_mode = True
+            except Exception as e:
+                st.error(f"Failed to generate lesson: {e}")
+        st.rerun()
+
+    st.markdown("---")
     st.info("Argus uses LangGraph for iterative reasoning and self-criticism to ensure factual accuracy.")
 
 # ---------------- MAIN UI ----------------
-st.markdown('<h1 class="main-header">Argus: Multi-Agent Verified RAG</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Advanced research assistant powered by Groq & LangGraph</p>', unsafe_allow_html=True)
-
-# Display chat history
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+if st.session_state.get("lesson_mode", False):
+    st.markdown('<h1 class="main-header">Argus Architecture Lesson</h1>', unsafe_allow_html=True)
+    if st.button("🔙 Back to Chat"):
+        st.session_state.lesson_mode = False
+        st.rerun()
         
-        if message["role"] == "assistant":
-            # Confidence Score
-            score = message.get("score", 0.0)
-            col1, col2 = st.columns([1, 4])
-            with col1:
-                st.markdown(f'<span class="confidence-label">Confidence</span>', unsafe_allow_html=True)
-            with col2:
-                st.progress(score)
-                st.caption(f"{int(score*100)}% reliability score")
-            
-            # Critic Feedback
-            if "feedback" in message:
-                with st.expander("🛠️ Internal Reasoning & Critic Feedback"):
-                    st.markdown(message["feedback"])
-
-# ---------------- CHAT INPUT ----------------
-if prompt := st.chat_input("Ask Argus anything..."):
-    # Add user message to history
-    st.session_state.messages.append({"role": "user", "content": prompt})
+    lesson_data = st.session_state.get("lesson_data")
+    if lesson_data and "lesson" in lesson_data:
+        for block in lesson_data["lesson"]:
+            if block["type"] == "attention":
+                st.info(f"✨ **Hook:** {block['content']}")
+            elif block["type"] == "objective":
+                st.success(f"🎯 **Objective:** {block['content']}")
+            elif block["type"] == "recall":
+                st.warning(f"🧠 **Recall:** {block['question']}")
+            elif block["type"] == "prediction":
+                st.warning(f"🔮 **Prediction:** {block['question']}")
+            elif block["type"] == "concept":
+                st.markdown(f"### 📚 {block.get('title', 'Concept')}")
+                st.write(block['explanation'])
+            elif block["type"] == "example":
+                st.markdown(f"**Example:**\n> {block['content']}")
+            elif block["type"] == "guided_practice":
+                st.markdown("#### 🛠️ Guided Practice")
+                for step in block.get('steps', []):
+                    st.markdown(f"- {step}")
+            elif block["type"] == "active_task":
+                st.info(f"✍️ **Active Task:** {block['task']}")
+            elif block["type"] == "feedback":
+                with st.expander("Show Feedback / Common Mistake"):
+                    st.error(f"❌ **Common Mistake:** {block['common_mistake']}")
+                    st.success(f"✅ **Fix:** {block['fix']}")
+            elif block["type"] == "assessment":
+                st.warning(f"📝 **Assessment:** {block['question']}")
+            elif block["type"] == "extension":
+                st.info(f"🚀 **Extension Task:** {block['task']}")
+            st.markdown("---")
+else:
+    st.markdown('<h1 class="main-header">Argus: Multi-Agent Verified RAG</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Advanced research assistant powered by Groq & LangGraph</p>', unsafe_allow_html=True)
     
-    # Display user message
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    # Call Backend / Graph Directly
-    with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        full_response = ""
-        
-        with st.spinner("Analyzing data and generating response..."):
-            try:
-                # Direct graph invocation instead of requests.post
-                from app.graph.workflow import build_graph
-                
-                if "graph_app" not in st.session_state:
-                    st.session_state.graph_app = build_graph()
-                
-                result = st.session_state.graph_app.invoke({
-                    "query": prompt,
-                    "revision_count": 0
-                })
-                
-                answer = result.get("draft_answer", "No answer generated.")
-                score = result.get("critique_score", 0.0)
-                feedback = result.get("critique_feedback", "No feedback available.")
-                
-                # Simulate streaming for premium feel
-                import re
-                # Split while preserving spaces and newlines
-                tokens = re.split(r'(\s+)', answer)
-                for token in tokens:
-                    full_response += token
-                    message_placeholder.markdown(full_response + "▌")
-                    time.sleep(0.01)
-                
-                message_placeholder.markdown(full_response)
-                
-                # Score and Feedback
+    # Display chat history
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+            
+            if message["role"] == "assistant":
+                # Confidence Score
+                score = message.get("score", 0.0)
                 col1, col2 = st.columns([1, 4])
                 with col1:
                     st.markdown(f'<span class="confidence-label">Confidence</span>', unsafe_allow_html=True)
@@ -231,16 +226,71 @@ if prompt := st.chat_input("Ask Argus anything..."):
                     st.progress(score)
                     st.caption(f"{int(score*100)}% reliability score")
                 
-                with st.expander("🛠️ Internal Reasoning & Critic Feedback"):
-                    st.markdown(feedback)
-                
-                # Add to history
-                st.session_state.messages.append({
-                    "role": "assistant", 
-                    "content": full_response,
-                    "score": score,
-                    "feedback": feedback
-                })
+                # Critic Feedback
+                if "feedback" in message:
+                    with st.expander("🛠️ Internal Reasoning & Critic Feedback"):
+                        st.markdown(message["feedback"])
+
+    # ---------------- CHAT INPUT ----------------
+    if prompt := st.chat_input("Ask Argus anything..."):
+        # Add user message to history
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        
+        # Display user message
+        with st.chat_message("user"):
+            st.markdown(prompt)
+    
+        # Call Backend / Graph Directly
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            full_response = ""
+            
+            with st.spinner("Analyzing data and generating response..."):
+                try:
+                    # Direct graph invocation instead of requests.post
+                    from app.graph.workflow import build_graph
                     
-            except Exception as e:
-                st.error(f"Error processing query: {e}")
+                    if "graph_app" not in st.session_state:
+                        st.session_state.graph_app = build_graph()
+                    
+                    result = st.session_state.graph_app.invoke({
+                        "query": prompt,
+                        "revision_count": 0
+                    })
+                    
+                    answer = result.get("draft_answer", "No answer generated.")
+                    score = result.get("critique_score", 0.0)
+                    feedback = result.get("critique_feedback", "No feedback available.")
+                    
+                    # Simulate streaming for premium feel
+                    import re
+                    # Split while preserving spaces and newlines
+                    tokens = re.split(r'(\s+)', answer)
+                    for token in tokens:
+                        full_response += token
+                        message_placeholder.markdown(full_response + "▌")
+                        time.sleep(0.01)
+                    
+                    message_placeholder.markdown(full_response)
+                    
+                    # Score and Feedback
+                    col1, col2 = st.columns([1, 4])
+                    with col1:
+                        st.markdown(f'<span class="confidence-label">Confidence</span>', unsafe_allow_html=True)
+                    with col2:
+                        st.progress(score)
+                        st.caption(f"{int(score*100)}% reliability score")
+                    
+                    with st.expander("🛠️ Internal Reasoning & Critic Feedback"):
+                        st.markdown(feedback)
+                    
+                    # Add to history
+                    st.session_state.messages.append({
+                        "role": "assistant", 
+                        "content": full_response,
+                        "score": score,
+                        "feedback": feedback
+                    })
+                        
+                except Exception as e:
+                    st.error(f"Error processing query: {e}")
